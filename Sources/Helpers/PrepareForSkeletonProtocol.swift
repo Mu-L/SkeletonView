@@ -19,7 +19,7 @@ extension UIView {
 
 extension UILabel {
     var desiredHeightBasedOnNumberOfLines: CGFloat {
-        let lineHeight = multilineTextFont?.lineHeight ?? SkeletonAppearance.default.multilineHeight
+        let lineHeight = constraintHeight ?? SkeletonAppearance.default.multilineHeight
         let spaceNeededForEachLine = lineHeight * CGFloat(numberOfLines)
         let spaceNeededForSpaces = skeletonLineSpacing * CGFloat(numberOfLines - 1)
         let padding = paddingInsets.top + paddingInsets.bottom
@@ -39,8 +39,10 @@ extension UILabel {
     }
     
     func restoreBackupHeightConstraints() {
+        heightConstraints.forEach {
+            removeConstraint($0)
+        }
         guard !backupHeightConstraints.isEmpty else { return }
-        NSLayoutConstraint.deactivate(heightConstraints)
         NSLayoutConstraint.activate(backupHeightConstraints)
         backupHeightConstraints.removeAll()
     }
@@ -61,6 +63,18 @@ extension UITextView {
         resignFirstResponder()
         startTransition { [weak self] in
             self?.textColor = .clear
+        }
+    }
+}
+
+extension UITextField {
+    override func prepareViewForSkeleton() {
+        backgroundColor = .clear
+        resignFirstResponder()
+
+        startTransition { [weak self] in
+            self?.textColor = .clear
+            self?.placeholder = nil
         }
     }
 }
